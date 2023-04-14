@@ -24,27 +24,18 @@ def handler(event, context):
             if len(tags) != 0:
                 tag_param(app_id, stage, key, tags, ssm)
 
-        response = {
+        return {
             'statusCode': 200,
             'body': 'Processed.',
-            'headers': {
-                'Content-Type': 'text/plain'
-            }
+            'headers': {'Content-Type': 'text/plain'},
         }
-
-        return response
-
     except:
 
-        response = {
+        return {
             'statusCode': 500,
             'body': 'Err: Internal server error.',
-            'headers': {
-                'Content-Type': 'text/plain'
-            }
+            'headers': {'Content-Type': 'text/plain'},
         }
-
-        return response
 
 def parse_event(event):
 
@@ -105,15 +96,13 @@ def put_param(app_id, stage, key, value, ssm):
             Type=param_type,
             Overwrite=True
         )
-    
+
         logger.info(f'Put Response:\n{put}')
-    
-        response = True
+
+        return True
     else:
         logger.info('Parameter is current.')
-        response = False
-
-    return response
+        return False
 
 def get_client(service):
     region = os.environ['REGION']
@@ -141,7 +130,7 @@ def decrypt(value):
 def compare_param(app_id, stage, key, value, param_type):
 
     ssm = get_client('ssm')
-    
+
     try:
         get = ssm.get_parameter(
             Name=f'/{app_id}/{stage}/{key}',
@@ -151,10 +140,7 @@ def compare_param(app_id, stage, key, value, param_type):
         existing_value = get['Parameter']['Value']
         existing_type = get['Parameter']['Type']
 
-        if existing_value != value or existing_type != param_type:
-            compare = True
-        else:
-            compare = False
+        compare = existing_value != value or existing_type != param_type
     except:
         compare = True
 

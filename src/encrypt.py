@@ -10,50 +10,36 @@ logger.setLevel(logging.INFO)
 def handler(event, context):
     
     logger.info('Incoming event!')
-    
+
     try:
 
         secret = get_secret(event)
 
         if secret is None:
 
-            response = {
-                'statusCode': 400,
-                'body': 'Err: No secret supplied with POST method.',
-                'headers': {
-                    'Content-Type': 'text/plain'
-                }
-            }
-
             logger.info('Err: No secret supplied with POST method.')
 
-            return response
-
+            return {
+                'statusCode': 400,
+                'body': 'Err: No secret supplied with POST method.',
+                'headers': {'Content-Type': 'text/plain'},
+            }
         cipher = encrypt(secret)
 
         logger.info(cipher)
 
-        response = {
+        return {
             'statusCode': 200,
             'body': cipher,
-            'headers': {
-                'Content-Type': 'text/plain'
-            }
+            'headers': {'Content-Type': 'text/plain'},
         }
-
-        return response
-
     except:
 
-        response = {
+        return {
             'statusCode': 500,
             'body': 'Err: Internal server error.',
-            'headers': {
-                'Content-Type': 'text/plain'
-            }
+            'headers': {'Content-Type': 'text/plain'},
         }
-
-        return response
 
 def get_secret(event):
 
@@ -82,13 +68,9 @@ def encrypt(secret):
     blob = base64.b64encode(kms_response['CiphertextBlob'])
     logger.info(f'Blob: {blob}')
 
-    cipher = 'cipher:' + blob.decode()
-
-    return cipher
+    return f'cipher:{blob.decode()}'
 
 def get_client():
     
     region = os.environ['REGION']
-    kms = boto3.client('kms', region_name=region)
-
-    return kms
+    return boto3.client('kms', region_name=region)

@@ -19,7 +19,7 @@ class test_view(unittest.TestCase):
 
         self.string_key_1 = 'foo'
         self.string_key_2 = 'bar'
-        self.string_key = self.string_key_1 + '.' + self.string_key_2
+        self.string_key = f'{self.string_key_1}.{self.string_key_2}'
         self.string_value = 'bazz'
         self.string_param = self.param + self.string_key
 

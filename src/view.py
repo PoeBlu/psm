@@ -20,27 +20,18 @@ def handler(event, context):
 
         params = parse_params(app_id, stage, naked_params)
 
-        response = {
+        return {
             'statusCode': 200,
             'body': params,
-            'headers': {
-                'Content-Type': 'application/json'
-            }
+            'headers': {'Content-Type': 'application/json'},
         }
-
-        return response
-
     except:
 
-        response = {
+        return {
             'statusCode': 500,
             'body': 'Err: Internal server error.',
-            'headers': {
-                'Content-Type': 'text/plain'
-            }
+            'headers': {'Content-Type': 'text/plain'},
         }
-
-        return response
 
 def parse_event(event):
 
@@ -55,7 +46,7 @@ def parse_event(event):
 def get_params(app_id, stage):
 
     ssm = get_client('ssm')
-    
+
     response = ssm.get_parameters_by_path(
         Path=f'/{app_id}/{stage}/',
         Recursive=True,
@@ -64,9 +55,7 @@ def get_params(app_id, stage):
 
     logger.info('Got params!')
 
-    naked_params = response['Parameters']
-
-    return naked_params
+    return response['Parameters']
 
 def get_client(service):
     region = os.environ['REGION']
@@ -94,15 +83,13 @@ def parse_params(app_id, stage, naked_params):
 
         new_param = {key: value}
         flat_params = {**flat_params, **new_param}
-    
+
     logger.info('Flat params parsed!')
-    
+
     unflat_params = unflatten(flat_params, '.')
     logger.info(f'Params: {unflat_params}')
 
-    params = json.dumps(unflat_params)
-
-    return params
+    return json.dumps(unflat_params)
 
 def encrypt(secret):
 
@@ -116,6 +103,4 @@ def encrypt(secret):
     blob = base64.b64encode(kms_response['CiphertextBlob'])
     logger.info(f'Blob: {blob}')
 
-    cipher = 'cipher:' + blob.decode()
-
-    return cipher
+    return f'cipher:{blob.decode()}'
